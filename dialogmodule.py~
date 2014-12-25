@@ -1,0 +1,12 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+
+def install(a):
+	os.system("yum install "+ a +" -y &> /dev/null")
+
+def msgbox(a,h,w):
+	os.system("dialog  --msgbox '"+ a +"' "+h+" "+w)
+	

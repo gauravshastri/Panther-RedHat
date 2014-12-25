@@ -1,0 +1,7 @@
+#!/usr/bin/python2
+
+import dm
+dm.msgbox("hello", "20","30")
+dm.inputbox("Enterr user to login", "10", "40", "input.txt")
+dm.passwdbox("10","40","/root/Desktop/pass.txt")
+dm.progressbar("10","40")

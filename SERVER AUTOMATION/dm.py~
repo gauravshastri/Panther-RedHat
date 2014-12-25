@@ -1,0 +1,43 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import commands
+
+def install(package):
+	os.system("yum install "+ package +" -y &> /dev/null")
+
+def restart(service_name):
+	os.system("service "+service_name+" restart &> /dev/null")
+
+def infobox(title,text,h,w):
+	os.system("dialog  --title '"+title+"' --infobox '"+ text +"' "+h+" "+w)
+	time.sleep(2)
+
+def msgbox(text,h,w):
+	os.system("dialog  --msgbox '"+ text +"' "+h+" "+w)
+	
+def inputbox(text,h,w,filepath):
+	os.system("dialog  --inputbox '"+text+"' "+h+" "+w+" 2> "+filepath)
+
+def passwdbox(h,w,filepath):
+	os.system("dialog --title 'User Authentication' --clear --insecure --passwordbox 'Enter password' "+h+" "+w+" 2> "+filepath)
+
+def progressbar(h,w):
+	os.system("for i in $(seq 0 4 100) ; do sleep 0.05; echo $i | dialog --gauge 'Please wait' "+h+" "+w+" 0; done")
+
+def yesnobox(text,h,w,filepath):
+	x=os.system("dialog  --yesno '"+text+"' "+h+" "+w+" ; echo $? > "+filepath )
+
+def dirbox(init_dir_path, filepath):
+	os.system("dialog --title 'Select a Directory' --dselect "+init_dir_path+" 25 60 2> "+filepath)
+
+def filebox(init_dir_path, filepath):
+	os.system("dialog --title 'Select a File' --fselect "+init_dir_path+" 25 60 2> "+filepath)
+
+def editbox(filepath,h,w):
+	os.system("dialog --fselect "+filepath+" 25 60 2> "+filepath)
+
+def tailbox(filepath,h,w):
+	os.system("dialog --tailbox "+filepath+" "+h+" "+w)

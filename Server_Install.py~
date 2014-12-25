@@ -1,0 +1,116 @@
+#!/usr/bin/python2
+import os
+import time
+import sys
+from dm import *
+
+
+def ftp_install():
+	try:
+		var=os.system("rpm -q vsftpd &> /dev/null")
+		if var!=0:
+			install("vsftpd")
+		restart("vsftpd")
+		os.system("echo '\nFTP Server:-' >> files/servers_status")
+		os.system("service vsftpd status >> files/servers_status")
+		os.system("chkconfig vsftpd on")
+		msgbox("Successfully Installed FTP server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def telnet_install():
+	try:
+		var=os.system("rpm -q telnet-server &> /dev/null")+os.system("rpm -q telnet &> /dev/null")
+		if var!=0:
+			install("telnet")
+			install("telnet-server")
+		restart("xinetd")
+		restart("telnet")
+		os.system("echo '\nTelnet Server:-' >> files/servers_status")
+		os.system("service xinetd status >> files/servers_status")
+		os.system("chkconfig telnet on")
+		os.system("chkconfig xinetd on")
+		msgbox("Successfully Installed Telnet server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def samba_install():
+	try:
+		var=os.system("rpm -q samba* &> /dev/null")
+		if var!=0:
+			install("samba")
+		restart("smb")
+		os.system("echo '\nSamba Server:-' >> files/servers_status")
+		os.system("service smb status >> files/servers_status")
+		os.system("chkconfig smb on")
+		msgbox("Successfully Installed Samba server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ssh_install():
+	try:
+		var=os.system("rpm -q openssh-server &> /dev/null")
+		if var!=0:
+			install("openssh-server")
+		restart("sshd")
+		os.system("echo '\nSSH Server:-' >> files/servers_status")
+		os.system("service sshd status >> files/servers_status")
+		os.system("chkconfig sshd on")
+		msgbox("Successfully Installed SSH server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def web_install():
+	try:
+		var=os.system("rpm -q http* &> /dev/null")
+		if var!=0:
+			install("httpd")
+			install("httpd-devel")
+		restart("httpd")
+		os.system("echo '\nWEB Server:-' >> files/servers_status")
+		os.system("service httpd status >> files/servers_status")
+		os.system("chkconfig httpd on")
+		msgbox("Successfully Installed Web server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def mail_install():
+	try:
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		restart("postfix")
+		restart("network")
+		os.system("echo '\nMail Server:-' >> files/servers_status")
+		os.system("service postfix status >> files/servers_status")
+		os.system("chkconfig postfix on")
+		msgbox("Successfully Installed Mail server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nis_install():
+	try:
+		var=os.system("rpm -q ypserv &> /dev/null")
+		if var!=0:
+			install("ypserv")
+		restart("ypserv")
+		os.system("echo '\nNIS Server:-' >> files/servers_status")
+		os.system("service ypserv status  >> files/servers_status")
+		os.system("chkconfig ypserv on")
+		msgbox("Successfully Installed NIS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nfs_install():
+	try:
+		var=os.system("rpm -q nfs-utils &> /dev/null")
+		if var!=0:
+			install("nfs")
+		restart("nfs")
+		os.system("echo '\nNFS Server:-' >> files/servers_status")
+		os.system("service nfs status >> files/servers_status")
+		os.system("chkconfig nfs on")
+		msgbox("Successfully Installed NFS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+

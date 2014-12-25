@@ -1,0 +1,47 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+
+os.system("yum install dialog -y &> /dev/null")
+
+os.system("dialog  --infobox 'Welocme to cloud' 10 40")
+
+time.sleep(2)
+
+
+os.system("dialog  --msgbox 'Click to cont..' 10 40")
+
+os.system("dialog  --inputbox 'Enter user to login' 10 40  2> /tmp/user")
+
+os.system("dialog  --passwordbox 'Enter user to login' 10 40  2> /tmp/pass")
+
+
+fhuser=open("/tmp/user", "r")
+user=fhuser.read()
+fhuser.close()
+
+fhpass=open("/tmp/pass", "r")
+passwd=fhpass.read()
+fhpass.close()
+
+
+
+if user=="vimal" and passwd=="lw":
+	os.system("dialog  --msgbox 'perfect welcome' 10 40")
+	os.system("dialog --menu 'select ur choice' 20 50 5  1 'SaaS' 2 'PaaS' 3 'IaaS' 4 'StaaS'  2> /tmp/ch")
+	fhch=open("/tmp/ch", "r")
+	ch=fhch.read()
+	fhch.close()
+	if int(ch) == 1:
+		print "Saas"
+	elif int(ch) == 2:
+		print "Paas"
+	else:
+		print "not supported"
+
+
+
+else:
+	 os.system("dialog  --yesno 'Want to try again' 10 40")

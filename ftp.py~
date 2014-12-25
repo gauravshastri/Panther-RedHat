@@ -1,0 +1,37 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("FTP SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/ftpch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 5 1 'Install FTP' 2 'Enable FTP Server' 3 'Restart FTP Service' 4 'Always start FTP service at BOOT time' 2> files/ftpch")
+		fhch=open("files/ftpch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q vsftpd &> /dev/null")
+			if var!=0:
+				install("vsftpd")
+				msgbox("Successfully installed FTP server on the Computer","10","40")
+			else:
+				msgbox("FTP Server is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("service vsftpd start")
+			msgbox("FTP Server- Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("vsftpd")
+			msgbox("service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig vsftpd on")
+		else:
+			sys.exit()

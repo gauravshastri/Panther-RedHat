@@ -1,0 +1,30 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+
+def install(package):
+	os.system("yum install "+ package +" -y &> /dev/null")
+
+def restart(service_name):
+	os.system("service "+service_name+" restart &> /dev/null")
+
+def infobox(title,text,h,w):
+	os.system("dialog  --title '"+title+"' --infobox '"+ text +"' "+h+" "+w)
+	time.sleep(2)
+
+def msgbox(text,h,w):
+	os.system("dialog  --msgbox '"+ text +"' "+h+" "+w)
+	
+def inputbox(h,w,filepath):
+	os.system("dialog  --inputbox "+h+" "+w+" 2> "+filepath)
+
+def passwdbox(h,w,filepath):
+	os.system("dialog --title 'User Authentication' --clear --insecure --passwordbox 'Enter password' "+h+" "+w+" 2> "+filepath)
+
+def progressbar(h,w):
+	os.system("for i in $(seq 0 4 100) ; do sleep 0.1; echo $i | dialog --gauge 'Please wait' "+h+" "+w+" 0; done")
+
+def yesnobox(text,h,w):
+	os.system("dialog  --yesno '"+text+"' "+h+" "+w)

@@ -1,0 +1,684 @@
+#!/usr/bin/python2
+import os
+import time
+import sys
+import fileinput
+import socket
+from dm import *
+import commands
+
+def main_network_scan():
+	p=1
+	os.system("touch hackfiles/temp")
+	while p!=0:
+		try:
+			os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title  'NETWORK SCANNING' --menu  'Select an Option' 25 60 15 1 'NMAP-the Ultimate Network Scanner' 2 'Show ARP table' 3 'Change IP Address' 4 'Change MAC Address' 5 'HPING--Customize your packets' 2> hackfiles/temp")
+			fh=open("hackfiles/temp", "r")
+			ch=fh.read()
+			fh.close()
+			if ch=="":
+				break
+			elif int(ch)==1:
+				nmap()
+			elif int(ch)==2:
+				arp()
+			elif int(ch)==3:
+				change_ip()
+			elif int(ch)==4:
+				change_mac()
+			elif int(ch)==5:
+				hping()
+			else:
+				pass
+		except:
+			retard()
+			pass	
+def getip():
+	inputbox("Enter the IP/Website Name:-","15","60","hackfiles/temp")
+	fh=open("hackfiles/temp", "r")
+	ip=fh.read().strip()
+	fh.close()
+	return ip
+
+def wait():
+	raw_input("\n*************************Press Enter to Continue************************\n")
+
+def nmap():
+	p=1
+	os.system("touch hackfiles/temp")
+	try:
+		while p!=0:
+			os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title  'NETWORK MAPPER/SCANNER' --menu  'Select an Option' 40 80 25 1 'Verbose Scan a single host or an IP address (IPv4)' 2 'Detailed Info about an IP' 3 'Scan a range of IPs' 4 'Ping only scan' 5 'TCP SYN scan' 6 'UDP scan ' 7 'Scan Multiple IPs' 8 'Scan port ranges' 9 'Operating system detection' 10 'IP protocol scan' 11 'Scan a whole Subnet' 12 'Scan a Host to Detect Firewall' 13 'Scan a Host to check if it is protected by Firewall' 14 'Find out Live hosts in a Network' 15 'Perform a Fast Scan on an IP' 16 'Print Host interfaces and Routes' 17 'Scan for specific Port' 18 'Perform a Stealth Scan' 19 'Perform a tcp null scan to fool a firewall' 20 'Find Host Services version Numbers' 21 'Scan remote hosts using TCP ACK (PA) and TCP Syn (PS)' 22 'Scan a firewall by packets fragmenting' 23 'Scan a firewall by a random MAC address' 24 'TCP Xmas scan to check firewall' 25 'Get NMAP Version' 2> hackfiles/temp")
+			fh=open("hackfiles/temp", "r")
+			ch=fh.read()
+			fh.close()
+			if ch=="":
+				break
+			elif int(ch)==1:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -v "+ip)
+					wait()
+			elif int(ch)==2:
+				ip=getip()	
+				if ip!="":
+					os.system("nmap -F -v -A "+ip)
+					wait()
+			elif int(ch)==3:
+				inputbox("Enter the Network Name e.g. 192.168.0:-","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp","r")
+				network=fh.read()
+				fh.close()
+				try:				
+					xx=socket.inet_aton(network)
+				except:
+					retard()
+					continue
+				inputbox("from? (1-254) ","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp", "r")
+				start=fh.read().strip()
+				fh.close()
+				inputbox("to? (1-254) ","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp", "r")
+				end=fh.read().strip()
+				fh.close()
+				if (network!="" and start!="" and end!="" and start.isdigit() and end.isdigit()):
+					if(int(start)<int(end)):
+						os.system("nmap -F "+network+"."+start+"-"+end)
+						wait()
+					else:
+						msgbox("Start IP hostname must be less than ending one","10","40")
+
+			elif int(ch)==4:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -sP "+ip)
+					wait()
+			elif int(ch)==5:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sS "+ip)
+					wait()
+			elif int(ch)==6:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sU "+ip)
+					wait()
+			elif int(ch)==7:
+				try:
+					inputbox("How many IPs?","15"," 40","hackfiles/temp")
+					fh=open("hackfiles/temp", "r")
+					cnt=fh.read()
+					fh.close()
+					if cnt.isdigit():
+						cnt=int(cnt)
+						fh.close()
+						iplist=""
+						for i in range(cnt):
+							os.system("dialog  --inputbox 'Enter IP"+str(i+1)+"' 15  40 2> hackfiles/temp")
+							fh=open("hackfiles/temp", "r")
+							ip=fh.read().strip()
+							fh.close()
+							if ip!="":
+								iplist+=ip+" "
+						os.system("nmap -F "+iplist)
+						wait()
+				except:
+					infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\nNMAP will restart now.\n\nPlease Contact Developer","25"," 40")
+					time.sleep(3)
+					pass
+			elif int(ch)==8:
+				try:		
+					ip=getip()
+					if ip!="":
+						inputbox("First Port No.? ","15","60","hackfiles/temp")
+						fh=open("hackfiles/temp", "r")
+						start=fh.read().strip()
+						fh.close()
+						inputbox("Last Port No.? ","15","60","hackfiles/temp")
+						fh=open("hackfiles/temp", "r")
+						end=fh.read().strip()
+						fh.close()
+						if start!="" and  end!="" and start.isdigit() and end.isdigit():
+							if(int(start)<int(end)):
+								os.system("nmap -p "+start+"-"+end+" "+ip)
+								wait()
+							else:
+								msgbox("Start IP hostname must be less than ending one","10"," 40") 
+				except:
+					infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\nNMAP will restart now.\n\nPlease Contact Developer","25"," 40")
+					time.sleep(3)
+					pass	
+	
+			elif int(ch)==9:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -O --osscan-guess "+ip)
+					wait()
+			elif int(ch)==10:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sO "+ip)
+					wait()
+			elif int(ch)==11:
+				inputbox("Enter Subnet e.g. 192.168.0 ","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp", "r")
+				subnet=fh.read().strip()
+				fh.close()
+				try:
+					xx=socket.inet_aton(subnet)
+				except:
+					retard()
+					continue
+				if subnet!="":
+					os.system("nmap -F "+subnet+".*")
+					wait()
+			elif int(ch)==12:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sA "+ip)
+					wait()
+			elif int(ch)==13:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -PN "+ip)
+					wait()
+			elif int(ch)==14:
+				inputbox("Enter Subnet e.g. 192.168.0 ","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp", "r")
+				subnet=fh.read().strip()
+				fh.close()
+				try:
+					xx=socket.inet_aton(subnet+".0")
+				except:
+					retard()
+					continue
+				if subnet!="":
+					os.system("nmap -T5 "+subnet+".*")
+					wait()
+			elif int(ch)==15:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F "+ip)
+					wait()
+			elif int(ch)==16:
+				os.system("nmap --iflist")
+				wait()
+		
+			elif int(ch)==17:
+				try:
+					ip=getip()
+					inputbox("Enter Port No. ","15","60","hackfiles/temp")
+					fh=open("hackfiles/temp", "r")
+					port=fh.read().strip()
+					fh.close()
+					if port!="" and  int(port)>=0 and port.isdigit() :
+						os.system("nmap -F -p "+port+" "+ip)
+						wait()
+				except:
+					infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\nNMAP will restart now.\n\nPlease Contact Developer","25"," 40")
+					time.sleep(3)
+					pass
+
+			elif int(ch)==18:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sS "+ip)
+					wait()
+			elif int(ch)==19:
+				inputbox("Enter Subnet e.g. 192.168.0 ","15","60","hackfiles/temp")
+				fh=open("hackfiles/temp", "r")
+				subnet=fh.read().strip()
+				fh.close()
+				try:
+					xx=socket.inet_aton(subnet)
+				except:
+					retard()
+					continue
+				if subnet!="":
+					os.system("nmap -F -SN "+subnet+".*")
+					wait()
+			elif int(ch)==20:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -sV "+ip)
+					wait()
+			elif int(ch)==21:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -PS "+ip)
+					wait()
+			elif int(ch)==22:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -f "+ip)
+					wait()
+			elif int(ch)==23:
+				ip=getip()
+				if ip!="":
+					os.system("nmap -F -v -sT -PN --spoof-mac 0 "+ip)
+					wait()
+			elif int(ch)==24:
+			## Sets the FIN, PSH, and URG flags, lighting the packet up like a Christmas tree ##
+				ip=getip()
+				if ip!="":
+					os.system("nmap -sX "+ip)
+					wait()
+			elif int(ch)==25:
+				ver=commands.getoutput("nmap -V").strip()
+				msgbox(ver,"15","50")
+	except:
+		infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\nNMAP will restart now.\n\nPlease Contact Developer","25"," 40")
+		pass
+	
+def arp():
+	os.system("arp  > hackfiles/temp")
+	tailbox("hackfiles/temp","15","80")
+
+def change_ip():
+	try:
+		os.system("touch hackfiles/originalip")
+		fh=open("hackfiles/originalip", "r")
+		original=fh.read().strip()
+		fh.close()
+		if original=="":
+			os.system("hostname -I > hackfiles/originalip")
+			msgbox("Your Original IP is Saved in ~hackfiles/originalip","15","40")
+		inputbox("Enter Interface Name e.g. wlan0 ","15","40","hackfiles/temp")
+		fh=open("hackfiles/temp", "r")
+		interface=fh.read().strip()
+		fh.close()
+		inputbox("Enter New IP","15","40","hackfiles/temp")
+		fh=open("hackfiles/temp", "r")
+		ip=fh.read().strip()
+		fh.close()
+		try:
+			xx=socket.inet_aton(ip)			
+		except:
+			retard()
+			return
+		if ip!="" and interface!="":
+			os.system("ifconfig "+interface+" "+ip)
+			msgbox("Your "+interface+" interface has IP: "+ip,"15","50")
+			os.system("ifconfig "+interface+" > hackfiles/temp")
+			textbox("hackfiles/temp","20","80")
+	except:
+		infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\nNMAP will restart now.\n\nPlease Contact Developer","25"," 50")
+		time.sleep(3)
+		pass
+
+def change_mac():
+	try:
+		os.system("touch hackfiles/originalmac")
+		inputbox("Enter Interface Name e.g. wlan0 ","15","40","hackfiles/temp")
+		fh=open("hackfiles/temp", "r")
+		interface=fh.read().strip()
+		fh.close()
+		fh=open("hackfiles/originalmac", "r")
+		original=fh.read().strip()
+		fh.close()
+		if original=="":
+			mac=commands.getoutput("/sbin/ifconfig | grep "+interface+" | tr -s ' ' | cut -d ' ' -f5")
+			if mac=="":
+				msgbox("The "+interface+" interface does not have any MAC Address or the interface itself does not exist","15","30")
+				return
+			os.system("echo "+mac+" > hackfiles/originalmac")
+		fh=open("hackfiles/originalmac", "r")
+		original=fh.read().strip()
+		fh.close()
+		msgbox("Your Original MAC Address is "+original,"15","40")
+		inputbox("Enter New MAC Address","15","40","hackfiles/temp")
+		fh=open("hackfiles/temp", "r")
+		newmac=fh.read().strip()
+		fh.close()
+		if (newmac!="" and interface!=""):
+			os.system("service NetworkManager stop &> /dev/null")
+			os.system("service network stop &> /dev/null")
+			os.system("ifdown "+interface)
+			os.system("ifconfig "+interface+" hw ether "+newmac)
+			os.system("ifup "+interface+" &> /dev/null")
+			msgbox("Your "+interface+" interface temporarily has new MAC address: "+newmac,"15","50")
+			os.system("service network start &> /dev/null")
+			os.system("ifconfig "+interface+" > hackfiles/temp")
+			tailbox("hackfiles/temp","20","80")
+		else:
+			msgbox("**Enter Valid MAC or Interface**","15","40")
+	except:
+		infobox("**********Error!!**********","Either you provided wrong input or some unknown error occurred.\n\n\nPlease Contact Developer","25"," 50")
+		time.sleep(3)
+		pass
+
+
+def hping():
+	''' 
+	   This is function that helps the user use hping to do effective netork scanning.
+	   It includes techniques like packet crafting and IP spoofing.
+	'''
+	try :
+		while True :
+	 		os.system("dialog --ascii-lines --backtitle 'tHe PaNtHeR' --title 'HPING Scanning'  --menu 'Choose One:' 80 80 10 1 'Normal Ping Using Hping' 2 'Port Scan using Hping' 3 'IP Spoof Ping' 4 'Traceroute using ICMP' 5 'SYN Scan' 6 'ACK Scan' 7 'FIN Scan' 8 'RST Scan' 9 'NULL Scan' 10 'XMAS Scan' 2> hackfiles/temp")
+			fh = open("hackfiles/temp",'r')
+			ch = fh.read()
+			fh.close()
+			if ch == "":
+				break
+			elif int(ch) == 1:
+				msgbox("This is a simple ping scan. You do not need packet capturing for this to verify.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR'  --inputbox 'Please enter the IP/URL of host : ' 20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continuue
+				os.system("hping3 -1 " + IP)
+				wait()
+			elif int(ch) == 2 :
+				msgbox("This is a simple port scan.\n You do not need packet capturing for this to verify.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR'  --inputbox 'Please enter the IP/URL of host : '  20 30  2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+				os.system("hping3 --scan 1-50,70-150 -S " + IP + " -V ")
+				wait()
+			elif int(ch) == 3 :
+				msgbox("This is a simple spoof IP ping.\n You do need packet capturing for this to verify.\n This utility requires you to give the spoof IP you want but that IP must be live also otherwise you will be caught easily in host tcpdump.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'IP Spoof Ping using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'IP Spoof Ping using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : ' 20 30  2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				sIP = fh.read()
+				fh.close()
+				if sIP == "":
+					continue
+				try :
+					xx = socket.inet_aton(sIP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				msgbox("Please open packet capturing in other window to analyse result.","20","30")
+				os.system("hping3 -1 -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+				wait()
+			elif int(ch) == 4 :
+				msgbox("This is a simple traceroute scan. You do not need packet capturing for this to verify.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'Traceroute using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				os.system("hping3 --traceroute -1 " + IP + " -V ")
+				wait()
+			elif int(ch) == 5 :
+				msgbox("This is a SYN scan.\n You do need packet capturing for this to verify.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'SYN scan using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "" or int(C) == 1:
+					pass
+				if int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'SYN Scan using Hping'  --inputbox 'Please enter the IP/URL of  Spoof host : '  20 30 2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						continue
+					if sIP != "":
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue
+					msgbox("Please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				if int(C) == 1 :
+					os.system("hping3 -S " + IP)
+					wait()
+
+			elif int(ch) == 6 : 
+				msgbox("This is a ACK scan.\n You do need packet capturing for this to verify.\n This scan can be used to see if a host is alive (when Ping is blocked for example).\n This should send a RST response back if the port is open.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'ACK scan using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "" or int(C) == 1:
+					pass
+				if int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'ACK scan using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : '  20 30 2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						continue
+					if sIP != "":
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue
+					msgbox("Please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -A -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				if int(C) == 1 :
+					os.system("hping3 -A -S " + IP)
+					wait()
+
+			elif int(ch) == 7 :
+				msgbox("This is a FIN scan.\n You do need packet capturing for this to verify.\n If we do not receive a reply, that means the port is open.\n Normally firewalls send a RST+ACK packet back to signal that the port is closed","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'FIN scan using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "" or int(C) == 1:
+					pass
+				if int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'FIN scan using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : '  20 30 2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						continue
+					if sIP != "":
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue
+					msgbox("Please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -F -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				elif int(C) == 1 :
+					os.system("hping3 -F -S " + IP)
+					wait()
+
+			elif int(ch) == 8 :
+				msgbox("This is a RST scan.\n You do need packet capturing for this to verify.\n If no reply is seen in packet capturing then it means that the host is live otherwise it is down.","40","50")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'RST scan using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "" or int(C) == 1:
+					pass
+				if int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'RST scan using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : '  20 30 2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						continue
+					if sIP != "":
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue
+					msgbox("please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -R -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				elif int(C) == 1 :
+					os.system("hping3 -R -S " + IP)
+					wait()
+
+			elif int(ch) == 9 :
+				msgbox("This is a NULL scan.\n You do need packet capturing for this to verify.\n If no reply is seen in packet capturing then it means that the host is live otherwise it is down.\n This scan sets the sequence number to zero and have no flags set in the packet.\n If the target device is TCP port is closed, the target device sends a TCP RST packet in reply.\n If the target device is TCP port is open, the target discards the TCP NULL scan, sending no reply.","70","80")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'NULL scan using Hping'  --inputbox 'Please enter the IP/URL of host : '  20 30 2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "" or int(C) == 1:
+					pass
+				if int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'NULL scan using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : ' 20 30  2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						continue
+					if sIP == "":
+						pass
+					if sIP != "" :
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue					
+					msgbox("Please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -N -S " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				elif int(C) == 1 :
+					os.system("hping3 -N -S " + IP)
+					wait()
+			elif int(ch) == 10 :
+				msgbox("This is a XMAS scan.\n You do need packet capturing for this to verify.\n This scan sets the sequence number to zero and set the URG + PSH + FIN flags in the packet.\n If the target device is TCP port is closed, the target device sends a TCP RST packet in reply.\n If the target device is TCP port is open, the target discards the TCP Xmas scan, sending no reply.","70","80")
+				os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'XMAS scan using Hping'  --inputbox 'Please enter the IP/URL of host : ' 20 30  2> hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				IP = fh.read()
+				fh.close()
+				if IP == "":
+					continue
+				try :
+					xx = socket.inet_aton(IP)	
+				except :
+					msgbox("Wrong IP format.Try again.","20","30")
+					continue
+				yesnobox("Do you want to use a spoof IP?","20","40","hackfiles/temp")
+				fh = open("hackfiles/temp",'r')
+				C = fh.read()
+				fh.close()
+				if C == "":
+					pass
+				if int(C) == 1 :
+					os.system("hping3 -M 0 " + IP)
+					wait()			
+				elif int(C) == 0:
+					os.system("dialog --ascii-lines --backtitle 'ThE PaNtHeR' --title 'XMAS scan using Hping'  --inputbox 'Please enter the IP/URL of Spoof host : ' 20 30  2> hackfiles/temp")
+					fh = open("hackfiles/temp",'r')
+					sIP = fh.read()
+					fh.close()
+					if sIP == "":
+						pass
+					if sIP != "" :
+						try :
+							xx = socket.inet_aton(sIP)	
+						except :
+							msgbox("Wrong IP format.Try again.","20","30")
+							continue
+					msgbox("please open packet capturing in other window to analyse result.","20","30")
+				
+					os.system("hping3 -M 0 " + IP + " -a " + sIP + " & hping3 -1 " + sIP)
+					wait()
+				
+	except KeyboardInterrupt:
+		msgbox("You decided to quit the program midway. Please be patient while using this tool.","20","30")
+		return 
+	except :
+		msgbox("Some error occured. Please contact the developer.","20","30")
+		return
+
+#main_network_scan()

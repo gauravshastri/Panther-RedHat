@@ -1,0 +1,2531 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def telnet_client():
+	var=os.system("rpm -q telnet &> /dev/null")
+	if var!=0:
+		install("telnet")
+	inputbox("Enter IP for Telnet connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("telnet "+ip)
+
+def ssh_client():
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ssh "+ip)
+
+def ftp_client():
+	var=os.system("rpm -q ftp &> /dev/null")
+	if var!=0:
+		install("ftp")
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ftp "+ip)
+	
+def web_py():
+	var=os.system("rpm -q firefox &> /dev/null")
+	if var!=0:
+		install("firefox")
+	inputbox("Enter IP/URL of Website ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	os.system("firefox "+ip)
+
+def mail_client():
+	p=1
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Send Mail' 2 'Check All Received Mails' 3 'See Instructions/Commands' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Email Id/User to which you want to send mail ","15","40","confiles/config")
+			fhip=open("confiles/config", "r")
+			ip=fhip.read().strip()
+			fhip.close()
+			yesnobox("Do you want to attach a file??","10","40","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("dialog --fselect /root/Desktop/ 18 48 2> confiles/config")
+				fhfp=open("confiles/config", "r")
+				fp=fhfp.read().strip()
+				fhfp.close()
+				os.system("mail -a "+fp+" "+ip)
+			else:
+				os.system("mail "+ip)
+		else:
+			sys.exit()	
+def nis_client():
+	var=os.system("rpm -q ypbind &> /dev/null")
+	if var!=0:
+		install("ypbind")
+	inputbox("Enter No. of users to Make their separate Directory where they can work","15","50","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.close()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"10","50","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("cp -rf /etc/skel /home/"+user)
+	os.system("authconfig--tui")
+
+def samba_client():
+	var=os.system("rpm -q samba-client &> /dev/null")
+	if var!=0:
+		install("samba-client")
+	inputbox("Enter ip address of samba server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter Share Name ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("smbclient //"+ip+"/"+sh) 
+
+def nfs_client():
+	var=os.system("rpm -q nfs-utils &> /dev/null")
+	if var!=0:
+		install("nfs-utils")
+	inputbox("Enter Name of the directory for mounting NFS folder","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("mkdir /media/"+direc)
+	os.system("mount -t nfs "+ip+":"+sh+" /media/"+direc)
+	
+def autofs_client():
+	var=os.system("rpm -q autofs &> /dev/null")
+	if var!=0:
+		install("autofs")
+	inputbox("Enter Path of the directory for mounting user's workspace","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	inputbox("Enter Name of the user for autofs","15","50","confiles/config")
+	fhusr=open("confiles/config", "r")
+	user=fhusr.read()
+	fhusr.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("echo "+user+"	"+ip+":"+sh+"/"+user+" >> /etc/auto.misc")
+	repl("/etc/auto.master",".*/etc/auto.misc",direc+"	/etc/auto.misc")	
+	restart("autofs")
+	
+def ntp_client():
+	var=os.system("rpm -q ntp &> /dev/null")
+	if var!=0:
+		install("ntp")
+	inputbox("Enter ip address of ntp server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("echo 'server '"+ip+" >> /etc/ntp.conf")
+	restart("ntpd")
+	os.system("ntpdate -b "+ip)
+	msgbox("Time synchronised with the NTP Server","15","40") 
+
+#!/usr/bin/python2
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def main_client_install():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'CLIENT SIDE SOFTWARE INSTALLATION' --menu  'Install Client Side Requirements for :-' 25 60 10 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Web Browser' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 9 'Autofs' 10 'NTP' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_client_install()
+		elif int(ch)==2:
+			ftp_client_install()
+		elif int(ch)==3:
+			ssh_client_install()
+		elif int(ch)==4:
+			web_client_install()
+		elif int(ch)==5:
+			mail_client_install()
+		elif int(ch)==6:
+			nis_client_install()
+		elif int(ch)==7:
+			nfs_client_install()
+		elif int(ch)==8:
+			samba_client_install()
+		elif int(ch)==9:
+			autofs_client_install()
+		elif int(ch)==10:
+			ntp_client_install()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","20","30")
+			time.sleep(3)
+			sys.exit()
+
+def telnet_client_install():
+	try:
+		var=os.system("rpm -q telnet &> /dev/null")
+		if var!=0:
+			install("telnet")
+		restart("telnet")
+		os.system("chkconfig ftp on")
+		msgbox("Successfully Installed Telnet Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ftp_client_install():
+	try:
+		var=os.system("rpm -q ftp &> /dev/null")
+		if var!=0:
+			install("ftp")
+		restart("ftp")
+		os.system("chkconfig ftp on")
+		msgbox("Successfully Installed FTP Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ssh_client_install():
+	try:
+		msgbox("Successfully Installed SSH Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def web_client_install():
+	try:
+		var=os.system("rpm -q firefox &> /dev/null")
+		if var!=0:
+			install("firefox")
+		msgbox("Successfully Installed Firefox Browser on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def mail_client_install():
+	try:
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		restart("postfix")
+		os.system("chkconfig postfix on")
+		msgbox("Successfully Installed Mail Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nis_client_install():
+	try:
+		var=os.system("rpm -q ypbind &> /dev/null")
+		if var!=0:
+			install("ypbind")
+		restart("ypbind")
+		os.system("chkconfig ypbind on")
+		msgbox("Successfully Installed NIS Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nfs_client_install():
+	try:
+		var=os.system("rpm -q nfs-utils &> /dev/null")
+		if var!=0:
+			install("nfs-utils")
+		restart("postfix")
+		os.system("chkconfig nfs on")
+		msgbox("Successfully Installed NFS Client Software on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def samba_client_install():
+	try:
+		var=os.system("rpm -q samba-client &> /dev/null")
+		if var!=0:
+			install("samba-client")
+		msgbox("Successfully Installed Samba Service Client Software on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def autofs_client_install():
+	try:
+		var=os.system("rpm -q autofs &> /dev/null")
+		if var!=0:
+			install("autoserv")
+		restart("autofs")
+		os.system("chkconfig autofs on")
+		msgbox("Successfully Installed autofs Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ntp_client_install():
+	try:
+		var=os.system("rpm -q ntp &> /dev/null")
+		if var!=0:
+			install("ntp")
+		restart("ntp")
+		os.system("chkconfig ntp on")
+		msgbox("Successfully Installed NTP Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+main_client_install()
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def main_client_install():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'CLIENT SIDE SOFTWARE INSTALLATION' --menu  'Install Client Side Requirements for :-' 25 60 10 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Web Browser' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 9 'Autofs' 10 'NTP' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_client_install()
+		elif int(ch)==2:
+			ftp_client_install()
+		elif int(ch)==3:
+			ssh_client_install()
+		elif int(ch)==4:
+			web_client_install()
+		elif int(ch)==5:
+			mail_client_install()
+		elif int(ch)==6:
+			nis_client_install()
+		elif int(ch)==7:
+			nfs_client_install()
+		elif int(ch)==8:
+			samba_client_install()
+		elif int(ch)==9:
+			autofs_client_install()
+		elif int(ch)==10:
+			ntp_client_install()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","20","30")
+			time.sleep(3)
+			sys.exit()
+
+def telnet_client_install():
+	try:
+		var=os.system("rpm -q telnet &> /dev/null")
+		if var!=0:
+			install("telnet")
+		restart("telnet")
+		os.system("chkconfig ftp on")
+		msgbox("Successfully Installed Telnet Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ftp_client_install():
+	try:
+		var=os.system("rpm -q ftp &> /dev/null")
+		if var!=0:
+			install("ftp")
+		restart("ftp")
+		os.system("chkconfig ftp on")
+		msgbox("Successfully Installed FTP Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ssh_client_install():
+	try:
+		msgbox("Successfully Installed SSH Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def web_client_install():
+	try:
+		var=os.system("rpm -q firefox &> /dev/null")
+		if var!=0:
+			install("firefox")
+		msgbox("Successfully Installed Firefox Browser on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def mail_client_install():
+	try:
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		restart("postfix")
+		os.system("chkconfig postfix on")
+		msgbox("Successfully Installed Mail Client on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nis_client_install():
+	try:
+		var=os.system("rpm -q ypbind &> /dev/null")
+		if var!=0:
+			install("ypbind")
+		restart("ypbind")
+		os.system("chkconfig ypbind on")
+		msgbox("Successfully Installed NIS Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nfs_client_install():
+	try:
+		var=os.system("rpm -q nfs-utils &> /dev/null")
+		if var!=0:
+			install("nfs-utils")
+		restart("postfix")
+		os.system("chkconfig nfs on")
+		msgbox("Successfully Installed NFS Client Software on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def samba_client_install():
+	try:
+		var=os.system("rpm -q samba-client &> /dev/null")
+		if var!=0:
+			install("samba-client")
+		msgbox("Successfully Installed Samba Service Client Software on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def autofs_client_install():
+	try:
+		var=os.system("rpm -q autofs &> /dev/null")
+		if var!=0:
+			install("autoserv")
+		restart("autofs")
+		os.system("chkconfig autofs on")
+		msgbox("Successfully Installed autofs Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ntp_client_install():
+	try:
+		var=os.system("rpm -q ntp &> /dev/null")
+		if var!=0:
+			install("ntp")
+		restart("ntp")
+		os.system("chkconfig ntp on")
+		msgbox("Successfully Installed NTP Client setup on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+main_client_install()
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def telnet_client():
+	var=os.system("rpm -q telnet &> /dev/null")
+	if var!=0:
+		install("telnet")
+	inputbox("Enter IP for Telnet connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("telnet "+ip)
+
+def ssh_client():
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ssh "+ip)
+
+def ftp_client():
+	var=os.system("rpm -q ftp &> /dev/null")
+	if var!=0:
+		install("ftp")
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ftp "+ip)
+	
+def web_py():
+	var=os.system("rpm -q firefox &> /dev/null")
+	if var!=0:
+		install("firefox")
+	inputbox("Enter IP/URL of Website ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	os.system("firefox "+ip)
+
+def mail_client():
+	p=1
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Send Mail' 2 'Check All Received Mails' 3 'See Instructions/Commands' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Email Id/User to which you want to send mail ","15","40","confiles/config")
+			fhip=open("confiles/config", "r")
+			ip=fhip.read().strip()
+			fhip.close()
+			yesnobox("Do you want to attach a file??","10","40","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("dialog --fselect /root/Desktop/ 18 48 2> confiles/config")
+				fhfp=open("confiles/config", "r")
+				fp=fhfp.read().strip()
+				fhfp.close()
+				os.system("mail -a "+fp+" "+ip)
+			else:
+				os.system("mail "+ip)
+		else:
+			sys.exit()	
+def nis_client():
+	var=os.system("rpm -q ypbind &> /dev/null")
+	if var!=0:
+		install("ypbind")
+	inputbox("Enter No. of users to Make their separate Directory where they can work","15","50","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.close()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"10","50","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("cp -rf /etc/skel /home/"+user)
+	os.system("authconfig--tui")
+
+def samba_client():
+	var=os.system("rpm -q samba-client &> /dev/null")
+	if var!=0:
+		install("samba-client")
+	inputbox("Enter ip address of samba server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter Share Name ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("smbclient //"+ip+"/"+sh) 
+
+def nfs_client():
+	var=os.system("rpm -q nfs-utils &> /dev/null")
+	if var!=0:
+		install("nfs-utils")
+	inputbox("Enter Name of the directory for mounting NFS folder","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("mkdir /media/"+direc)
+	os.system("mount -t nfs "+ip+":"+sh+" /media/"+direc)
+	
+def autofs_client():
+	var=os.system("rpm -q autofs &> /dev/null")
+	if var!=0:
+		install("autofs")
+	inputbox("Enter Path of the directory for mounting user's workspace","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	inputbox("Enter Name of the user for autofs","15","50","confiles/config")
+	fhusr=open("confiles/config", "r")
+	user=fhusr.read()
+	fhusr.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("echo "+user+"	"+ip+":"+sh+"/"+user+" >> /etc/auto.misc")
+	repl("/etc/auto.master",".*/etc/auto.misc",direc+"	/etc/auto.misc")	
+	restart("autofs")
+	
+def ntp_client():
+	var=os.system("rpm -q ntp &> /dev/null")
+	if var!=0:
+		install("ntp")
+	inputbox("Enter ip address of ntp server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("echo 'server '"+ip+" >> /etc/ntp.conf")
+	restart("ntpd")
+	os.system("ntpdate -b "+ip)
+	msgbox("Time synchronised with the NTP Server","15","40") 
+ntp_client()
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import commands
+
+def install(package):
+	os.system("yum install "+ package +" -y &> /dev/null")
+
+def restart(service_name):
+	os.system("service "+service_name+" restart &> /dev/null")
+
+def infobox(title,text,h,w):
+	os.system("dialog  --title '"+title+"' --infobox '"+ text +"' "+h+" "+w)
+	time.sleep(2)
+
+def msgbox(text,h,w):
+	os.system("dialog  --msgbox '"+ text +"' "+h+" "+w)
+	
+def inputbox(text,h,w,filepath):
+	os.system("dialog  --inputbox '"+text+"' "+h+" "+w+" 2> "+filepath)
+
+def passwdbox(h,w,filepath):
+	os.system("dialog --title 'User Authentication' --clear --insecure --passwordbox 'Enter password' "+h+" "+w+" 2> "+filepath)
+
+def progressbar(h,w):
+	os.system("for i in $(seq 0 4 100) ; do sleep 0.1; echo $i | dialog --gauge 'Please wait' "+h+" "+w+" 0; done")
+
+def yesnobox(text,h,w,filepath):
+	x=os.system("dialog  --yesno '"+text+"' "+h+" "+w+" ; echo $? > "+filepath )
+
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import commands
+
+def install(package):
+	os.system("yum install "+ package +" -y &> /dev/null")
+
+def restart(service_name):
+	os.system("service "+service_name+" restart &> /dev/null")
+
+def infobox(title,text,h,w):
+	os.system("dialog  --title '"+title+"' --infobox '"+ text +"' "+h+" "+w)
+	time.sleep(2)
+
+def msgbox(text,h,w):
+	os.system("dialog  --msgbox '"+ text +"' "+h+" "+w)
+	
+def inputbox(text,h,w,filepath):
+	os.system("dialog  --inputbox '"+text+"' "+h+" "+w+" 2> "+filepath)
+
+def passwdbox(h,w,filepath):
+	os.system("dialog --title 'User Authentication' --clear --insecure --passwordbox 'Enter password' "+h+" "+w+" 2> "+filepath)
+
+def progressbar(h,w):
+	os.system("for i in $(seq 0 4 100) ; do sleep 0.1; echo $i | dialog --gauge 'Please wait' "+h+" "+w+" 0; done")
+
+def yesnobox(text,h,w,filepath):
+	x=os.system("dialog  --yesno '"+text+"' "+h+" "+w+" ; echo $? 2> "+filepath )
+
+Ñò
+¯™ Sc           @   s|   d  d k  Z  d  d k Z d  d k Z d  d k Z d „  Z d „  Z d „  Z d „  Z d „  Z d „  Z	 d „  Z
+ d	 „  Z d S(
+   iÿÿÿÿNc         C   s   t  i d |  d ƒ d  S(   Ns   yum install s    -y &> /dev/null(   t   ost   system(   t   package(    (    s*   /root/Desktop/Project/Configurations/dm.pyt   install   s    c         C   s   t  i d |  d ƒ d  S(   Ns   service s    restart &> /dev/null(   R    R   (   t   service_name(    (    s*   /root/Desktop/Project/Configurations/dm.pyt   restart   s    c         C   s:   t  i d |  d | d | d | ƒ t i d ƒ d  S(   Ns   dialog  --title 's   ' --infobox 's   ' t    i   (   R    R   t   timet   sleep(   t   titlet   textt   ht   w(    (    s*   /root/Desktop/Project/Configurations/dm.pyt   infobox   s    )c         C   s%   t  i d |  d | d | ƒ d  S(   Ns   dialog  --msgbox 's   ' R   (   R    R   (   R
+   R   R   (    (    s*   /root/Desktop/Project/Configurations/dm.pyt   msgbox   s    c         C   s-   t  i d |  d | d | d | ƒ d  S(   Ns   dialog  --inputbox 's   ' R   s    2> (   R    R   (   R
+   R   R   t   filepath(    (    s*   /root/Desktop/Project/Configurations/dm.pyt   inputbox   s    c         C   s%   t  i d |  d | d | ƒ d  S(   NsW   dialog --title 'User Authentication' --clear --insecure --passwordbox 'Enter password' R   s    2> (   R    R   (   R   R   R   (    (    s*   /root/Desktop/Project/Configurations/dm.pyt	   passwdbox   s    c         C   s!   t  i d |  d | d ƒ d  S(   NsO   for i in $(seq 0 4 100) ; do sleep 0.1; echo $i | dialog --gauge 'Please wait' R   s    0; done(   R    R   (   R   R   (    (    s*   /root/Desktop/Project/Configurations/dm.pyt   progressbar   s    c         C   s/   t  i d |  d | d | d | ƒ } d  S(   Ns   dialog  --yesno 's   ' R   s    ; echo $? > (   R    R   (   R
+   R   R   R   t   x(    (    s*   /root/Desktop/Project/Configurations/dm.pyt   yesnobox   s    (   R    R   t   syst   commandsR   R   R   R   R   R   R   R   (    (    (    s*   /root/Desktop/Project/Configurations/dm.pyt   <module>   s   							#!/usr/bin/python2
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def main_server_config():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'SERVER SIDE SOFTWARE CONFIGURATION' --menu  'Which Server Do you want to Configure?' 25 60 15 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Apache' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 9 'NIS+NFS' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_conf()
+		elif int(ch)==2:
+			ftp_conf()
+		elif int(ch)==3:
+			ssh_conf()
+		elif int(ch)==4:
+			web_conf()
+		elif int(ch)==5:
+			mail_conf()
+		elif int(ch)==6:
+			nis_conf()
+		elif int(ch)==7:
+			nfs_conf()
+		elif int(ch)==8:
+			samba_conf()
+		elif int(ch)==9:
+			nisnfs_conf()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","25","30")
+			time.sleep(3)
+			sys.exit()
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def nisnfs_conf():
+	infobox("NIS+NFS SERVER CONFIGURATION","	Welcome User!!	","25","30")
+	os.system("touch confiles/config")
+	inputbox("Enter name of Directory in which user data will be saved:- ","15","60","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read().strip()
+	fhdir.close()
+	os.system("mkdir /"+direc)
+	msgbox("Enter name of Users for which you want to setup NFS service","15","50")		
+	inputbox("Enter No. of users ","15","60","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.cl+ose()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"15","60","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("mkdir /"+direc+"/"+user)
+		os.system("cp -rf /etc/skel /"+direc+"/"+user) 
+	install("nfs-utils")
+	os.system("setenforce 0; iptables -F")
+	os.system("chmod o+w /"+direc+"/ -R")
+	os.system("echo  '/'"+direc+" '*(sync,rw)' >> /etc/exports")		
+	restart("nfs")		
+
+def samba_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'SAMBA SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Share your Directory to all ' 2 'Share directory with a user' 3 'Allow only certain No.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+			os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+			os.system("echo 'public = yes'  >> /etc/samba/smb.conf ")
+			os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			inputbox("Enter name of the User:- ","15","60","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("useradd "+user+" &>/dev/null")
+			yesnobox("Do you want a password based Security??","15","50","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+				os.system("smbpasswd -a "+user )
+			else: 
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==3:
+			inputbox("Enter No. of IPs to only Allow them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' > confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '80s/.*hosts allow.*/        hosts allow = "+ips+"/' /etc/samba/smb.conf`")
+			restart("smb")
+		else:
+			sys.exit()
+
+def nfs_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'NFS SERVER CONFIGURATION' --menu 'Select Your Choice:-' 35 100 5 1 'Share your Directory on many IPs' 2 'Give access to all IPs on the web ' 3 'Change Permission to (read & write) for a particular shared directory for a particular IP' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("With how many IPs do you want to share?? :- ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo  "+direc+" "+ip+"'(sync)' >> /etc/exports") 
+			restart("nfs")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			os.system("echo  "+direc+" *'(sync)' >> /etc/exports")
+			restart("nfs")
+		elif int(ch)==3:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("For how many IPs do you want to change permission to read and write?? :- ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				str1=direc+" "+ip+"(sync)"
+				str2=direc+" "+ip+"(sync,rw)"
+				repl("/etc/exports",str1,str2)
+			restart("nfs")		
+		else:
+			sys.exit()
+
+def nis_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'NIS SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Set DomainName of NIS server ' 2 'Add User Accounts' 3 'Update NIS Database' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Domain Name ","15","60","confiles/config")
+			fhydn=open("confiles/config", "r")
+			ydn=fhydn.read().strip()
+			fhydn.close()
+			os.system("ypdomainname "+ydn)
+			restart("ypserv")	
+		elif int(ch)==2:
+			inputbox("Enter No. of users to Add them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("useradd "+user) 
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")				
+		elif int(ch)==3:
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")		
+		else:
+			sys.exit()
+
+
+def web_conf():
+	p=1 
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'WEB SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Enter your html code for testing' 2 'Name based Virtual Hosting' 3 'Serve Web pages to All' 4 'Serve Web Pages to certain no.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter your HTML Code here","15","50","/var/www/html/index.html")
+			os.system("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' &> confiles/config ")#hostname -I
+			fhip=open("confiles/config","r")
+			ip1=fhip.read()
+			ip=ip1.strip()
+			fhip.close()
+			os.system("firefox "+`ip`+" & sleep 5; pkill firefox")
+			msgbox("Your website is now running at IP:- "+ip,"15","50")
+		elif int(ch)==2:
+			os.system("iptables -F; setenforce 0")
+			restart("httpd")
+			os.system("hostname -I &> confiles/config ")
+			fhip=open("confiles/config","r")
+			ip=fhip.read().strip()
+			fhip.close()
+			os.system(" `sed -i 's/NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			os.system(" `sed -i 's/#NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			inputbox("How many websites do you want to host on IP "+ip+" virtually?","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter Website Name ","15","60","confiles/config")
+				fhweb=open("confiles/config", "r")
+				web=fhweb.read().strip()
+				fhweb.close()
+				#os.system("rm -rf /var/www/"+web+"/ &> /dev/null") 
+				#infobox("hi","","25","50")
+				os.system("mkdir /var/www/"+web+'/'" &> /dev/null")
+				os.system("`cp   /root/Desktop/Project/index.html /var/www/"+web+"/`")
+				#os.system("echo 'WELCOME TO MY ARENA' >> /var/www/"+web+"/index.html")
+				#os.system("sed -i 's/''/WELCOME TO '"+web+"'/g' /var/www/"+web+"/index.html") 
+				os.system("echo '<'VirtualHost "+web+"'>' >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '	DocumentRoot /var/www/'"+web+" >> /etc/httpd/conf/httpd.conf")
+				os.system("echo '	ServerName '"+ip+" >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '<'/VirtualHost'>' >> /etc/httpd/conf/httpd.conf")
+				os.system("echo  "+ip+" "+web+" >> /etc/hosts")
+				restart("httpd")
+				os.system("firefox "+`web`+" & sleep 5; pkill firefox")
+				msgbox("Your website "+web+" is now running at IP:- "+ip,"15","50")
+		elif int(ch)==3:
+			os.system("`sed -i '344s/Allow from.*/Allow from all/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of IPs to only Allow them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' *> confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '344s/.*Allow from.*/    Allow from "+ips+"/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")	
+		else:
+			sys.exit()
+
+def telnet_conf():
+	p=1
+	progressbar("25","30")
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'TELNET SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Allow Telnet only from certain no. of IPs' 2 'Restrict Some IPs' 3 'Allow Root Login from Telnet' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter No. of IPs","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'only_from = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==2:
+			inputbox("Enter No. of IPs","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'no_access = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==3:
+			inputbox("Enter No. of Telnet Sessions as root that you want:-","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			if cnt<=15:
+				for i in range(cnt):
+					os.system("echo pts/"+str(i)+" >> /etc/securetty") 
+				restart("xinetd")
+			else:
+				msgbox("Maximum Root Sessions Limit reached..Please enter a number less than or equal to 15","15","60")
+		else:
+			sys.exit()
+
+
+def ftp_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'FTP SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Allow Anonymous users to Login' 2 'Allow Local Users to Login' 3 'Allow Root Login' 4 'Deny some users' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/ftpusers`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/user_list`")
+			restart("vsftpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of users to deny them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/ftpusers")
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/user_list")
+			restart("vsftpd")				
+		else:
+			sys.exit()
+
+
+def ssh_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'SSH SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 15 1 'Block Root Login through SSH' 2 'Permit Empty Passwords' 3 'Enable Password Authentification' 4 'Set Maximum Authentication Limit' 5 'Deny some users' 6 'Set Login Grace Time' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of Maximum Tries ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==5:
+			inputbox("Enter No. of users to deny them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n DenyUsers >> /etc/ssh/sshd_config") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo -n ' '"+user+"' ' >> /etc/ssh/sshd_config") 
+			restart("sshd")	
+		elif int(ch)==6:
+			inputbox("Enter time in minutes ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		else:
+			sys.exit()
+
+def mail_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'MAIL SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Change Hostname' 2 'Allow Mail incoming from All Interfaces' 3 'Allow mail from Local machine' 4 'Mail Forwarding from Root Account' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Hostname","15","60","confiles/config")
+			fhost=open("confiles/config", "r")
+			hostname=fhost.read().strip()
+			fhost.close()
+			os.system("hostname "+hostname)
+			restart("postfix")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#inet_interfaces = all/inet_interfaces = all/g' /etc/postfix/main.cf`")
+			os.system("`sed -i 's/inet_interfaces = localhost/#inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#inet_interfaces = localhost/inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")			
+		elif int(ch)==4:
+			inputbox(" Enter the name of User ","15","60","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("`sed -i 's/#root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("`sed -i 's/root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("newaliases")
+			restart("postfix")	
+		else:
+			sys.exit()
+
+main_server_config()
+#!/usr/bin/python2
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def main_server_config():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'SERVER SIDE SOFTWARE CONFIGURATION' --menu  'Which Server Do you want to Configure?' 25 60 15 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Apache' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 9 'NIS+NFS' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_conf()
+		elif int(ch)==2:
+			ftp_conf()
+		elif int(ch)==3:
+			ssh_conf()
+		elif int(ch)==4:
+			web_conf()
+		elif int(ch)==5:
+			mail_conf()
+		elif int(ch)==6:
+			nis_conf()
+		elif int(ch)==7:
+			nfs_conf()
+		elif int(ch)==8:
+			samba_conf()
+		elif int(ch)==9:
+			nisnfs_conf()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","25","30")
+			time.sleep(3)
+			sys.exit()
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def nisnfs_conf():
+	infobox("NIS+NFS SERVER CONFIGURATION","	Welcome User!!	","25","30")
+	os.system("touch confiles/config")
+	inputbox("Enter name of Directory in which user data will be saved:- ","15","60","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read().strip()
+	fhdir.close()
+	os.system("mkdir /"+direc)
+	msgbox("Enter name of Users for which you want to setup NFS service","15","50")		
+	inputbox("Enter No. of users ","15","60","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.cl+ose()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"15","60","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("mkdir /"+direc+"/"+user)
+		os.system("cp -rf /etc/skel /"+direc+"/"+user) 
+	install("nfs-utils")
+	os.system("setenforce 0; iptables -F")
+	os.system("chmod o+w /"+direc+"/ -R")
+	os.system("echo  '/'"+direc+" '*(sync,rw)' >> /etc/exports")		
+	restart("nfs")		
+
+def samba_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'SAMBA SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Share your Directory to all ' 2 'Share directory with a user' 3 'Allow only certain No.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+			os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+			os.system("echo 'public = yes'  >> /etc/samba/smb.conf ")
+			os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			inputbox("Enter name of the User:- ","15","60","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("useradd "+user+" &>/dev/null")
+			yesnobox("Do you want a password based Security??","15","50","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+				os.system("smbpasswd -a "+user )
+			else: 
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==3:
+			inputbox("Enter No. of IPs to only Allow them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' > confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '80s/.*hosts allow.*/        hosts allow = "+ips+"/' /etc/samba/smb.conf`")
+			restart("smb")
+		else:
+			sys.exit()
+
+def nfs_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'NFS SERVER CONFIGURATION' --menu 'Select Your Choice:-' 35 100 5 1 'Share your Directory on many IPs' 2 'Give access to all IPs on the web ' 3 'Change Permission to (read & write) for aparticular shared directory for a particular IP' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("With how many IPs do you want to share?? :- ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo  "+direc+" "+ip+"'(sync)' >> /etc/exports") 
+			restart("nfs")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			os.system("echo  "+direc+" *'(sync)' >> /etc/exports")
+			restart("nfs")
+		elif int(ch)==3:
+			inputbox("Enter Path of Directory:- ","15","60","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("For how many IPs do you want to change permission to read and write?? :- ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				str1=direc+" "+ip+"(sync)"
+				str2=direc+" "+ip+"(sync,rw)"
+				repl("/etc/exports",str1,str2)
+			restart("nfs")		
+		else:
+			sys.exit()
+
+def nis_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'NIS SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Set DomainName of NIS server ' 2 'Add User Accounts' 3 'Update NIS Database' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Domain Name ","15","60","confiles/config")
+			fhydn=open("confiles/config", "r")
+			ydn=fhydn.read().strip()
+			fhydn.close()
+			os.system("ypdomainname "+ydn)
+			restart("ypserv")	
+		elif int(ch)==2:
+			inputbox("Enter No. of users to Add them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("useradd "+user) 
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")				
+		elif int(ch)==3:
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")		
+		else:
+			sys.exit()
+
+
+def web_conf():
+	p=1 
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'WEB SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Enter your html code for testing' 2 'Name based Virtual Hosting' 3 'Serve Web pages to All' 4 'Serve Web Pages to certain no.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter your HTML Code here","15","50","/var/www/html/index.html")
+			os.system("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' &> confiles/config ")#hostname -I
+			fhip=open("confiles/config","r")
+			ip1=fhip.read()
+			ip=ip1.strip()
+			fhip.close()
+			os.system("firefox "+`ip`+" & sleep 5; pkill firefox")
+			msgbox("Your website is now running at IP:- "+ip,"15","50")
+		elif int(ch)==2:
+			os.system("iptables -F; setenforce 0")
+			restart("httpd")
+			os.system("hostname -I &> confiles/config ")
+			fhip=open("confiles/config","r")
+			ip=fhip.read().strip()
+			fhip.close()
+			os.system(" `sed -i 's/NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			os.system(" `sed -i 's/#NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			inputbox("How many websites do you want to host on IP "+ip+" virtually?","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter Website Name ","15","60","confiles/config")
+				fhweb=open("confiles/config", "r")
+				web=fhweb.read().strip()
+				fhweb.close()
+				#os.system("rm -rf /var/www/"+web+"/ &> /dev/null") 
+				#infobox("hi","","25","50")
+				os.system("mkdir /var/www/"+web+'/'" &> /dev/null")
+				os.system("`cp   /root/Desktop/Project/index.html /var/www/"+web+"/`")
+				#os.system("echo 'WELCOME TO MY ARENA' >> /var/www/"+web+"/index.html")
+				#os.system("sed -i 's/''/WELCOME TO '"+web+"'/g' /var/www/"+web+"/index.html") 
+				os.system("echo '<'VirtualHost "+web+"'>' >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '	DocumentRoot /var/www/'"+web+" >> /etc/httpd/conf/httpd.conf")
+				os.system("echo '	ServerName '"+ip+" >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '<'/VirtualHost'>' >> /etc/httpd/conf/httpd.conf")
+				os.system("echo  "+ip+" "+web+" >> /etc/hosts")
+				restart("httpd")
+				os.system("firefox "+`web`+" & sleep 5; pkill firefox")
+				msgbox("Your website "+web+" is now running at IP:- "+ip,"15","50")
+		elif int(ch)==3:
+			os.system("`sed -i '344s/Allow from.*/Allow from all/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of IPs to only Allow them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' *> confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '344s/.*Allow from.*/    Allow from "+ips+"/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")	
+		else:
+			sys.exit()
+
+def telnet_conf():
+	p=1
+	progressbar("25","30")
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'TELNET SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Allow Telnet only from certain no. of IPs' 2 'Restrict Some IPs' 3 'Allow Root Login from Telnet' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter No. of IPs","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'only_from = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==2:
+			inputbox("Enter No. of IPs","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'no_access = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"15","60","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==3:
+			inputbox("Enter No. of Telnet Sessions as root that you want:-","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			if cnt<=15:
+				for i in range(cnt):
+					os.system("echo pts/"+str(i)+" >> /etc/securetty") 
+				restart("xinetd")
+			else:
+				msgbox("Maximum Root Sessions Limit reached..Please enter a number less than or equal to 15","15","60")
+		else:
+			sys.exit()
+
+
+def ftp_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'FTP SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Allow Anonymous users to Login' 2 'Allow Local Users to Login' 3 'Allow Root Login' 4 'Deny some users' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/ftpusers`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/user_list`")
+			restart("vsftpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of users to deny them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/ftpusers")
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/user_list")
+			restart("vsftpd")				
+		else:
+			sys.exit()
+
+
+def ssh_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'SSH SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 15 1 'Block Root Login through SSH' 2 'Permit Empty Passwords' 3 'Enable Password Authentification' 4 'Set Maximum Authentication Limit' 5 'Deny some users' 6 'Set Login Grace Time' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of Maximum Tries ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==5:
+			inputbox("Enter No. of users to deny them ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n DenyUsers >> /etc/ssh/sshd_config") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"15","60","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo -n ' '"+user+"' ' >> /etc/ssh/sshd_config") 
+			restart("sshd")	
+		elif int(ch)==6:
+			inputbox("Enter time in minutes ","15","60","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		else:
+			sys.exit()
+
+def mail_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --title 'MAIL SERVER CONFIGURATION' --menu 'Select Your Choice:-' 25 60 5 1 'Change Hostname' 2 'Allow Mail incoming from All Interfaces' 3 'Allow mail from Local machine' 4 'Mail Forwarding from Root Account' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Hostname","15","60","confiles/config")
+			fhost=open("confiles/config", "r")
+			hostname=fhost.read().strip()
+			fhost.close()
+			os.system("hostname "+hostname)
+			restart("postfix")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#inet_interfaces = all/inet_interfaces = all/g' /etc/postfix/main.cf`")
+			os.system("`sed -i 's/inet_interfaces = localhost/#inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#inet_interfaces = localhost/inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")			
+		elif int(ch)==4:
+			inputbox(" Enter the name of User ","15","60","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("`sed -i 's/#root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("`sed -i 's/root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("newaliases")
+			restart("postfix")	
+		else:
+			sys.exit()
+
+main_server_config()
+#!/usr/bin/python2
+import os
+import time
+import sys
+from dm import *
+
+def main_server_install():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'SERVER SIDE SOFTWARE INSTALLATION' --menu  'Install Server Side Requirements for :-' 25 60 10 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Apache' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_install()
+		elif int(ch)==2:
+			ftp_install()
+		elif int(ch)==3:
+			ssh_install()
+		elif int(ch)==4:
+			web_install()
+		elif int(ch)==5:
+			mail_install()
+		elif int(ch)==6:
+			nis_install()
+		elif int(ch)==7:
+			nfs_install()
+		elif int(ch)==8:
+			samba_install()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","20","30")
+			time.sleep(3)
+			sys.exit()
+
+def ftp_install():
+	try:
+		var=os.system("rpm -q vsftpd &> /dev/null")
+		if var!=0:
+			install("vsftpd")
+		restart("vsftpd")
+		os.system("echo '\nFTP Server:-' >> confiles/servers_status")
+		os.system("service vsftpd status >> confiles/servers_status")
+		os.system("chkconfig vsftpd on")
+		msgbox("Successfully Installed FTP server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def telnet_install():
+	try:
+		var=os.system("rpm -q telnet-server &> /dev/null")+os.system("rpm -q telnet &> /dev/null")
+		if var!=0:
+			install("telnet")
+			install("telnet-server")
+		restart("xinetd")
+		restart("telnet")
+		os.system("echo '\nTelnet Server:-' >> confiles/servers_status")
+		os.system("service xinetd status >> confiles/servers_status")
+		os.system("chkconfig telnet on")
+		os.system("chkconfig xinetd on")
+		msgbox("Successfully Installed Telnet server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def samba_install():
+	try:
+		var=os.system("rpm -q samba* &> /dev/null")
+		if var!=0:
+			install("samba")
+		restart("smb")
+		os.system("echo '\nSamba Server:-' >> confiles/servers_status")
+		os.system("service smb status >> confiles/servers_status")
+		os.system("chkconfig smb on")
+		msgbox("Successfully Installed Samba server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ssh_install():
+	try:
+		var=os.system("rpm -q openssh-server &> /dev/null")
+		if var!=0:
+			install("openssh-server")
+		restart("sshd")
+		os.system("echo '\nSSH Server:-' >> confiles/servers_status")
+		os.system("service sshd status >> confiles/servers_status")
+		os.system("chkconfig sshd on")
+		msgbox("Successfully Installed SSH server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def web_install():
+	try:
+		var=os.system("rpm -q http* &> /dev/null")
+		if var!=0:
+			install("httpd")
+			install("httpd-devel")
+		restart("httpd")
+		os.system("echo '\nWEB Server:-' >> confiles/servers_status")
+		os.system("service httpd status >> confiles/servers_status")
+		os.system("chkconfig httpd on")
+		msgbox("Successfully Installed Apache Web server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def mail_install():
+	try:
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		restart("postfix")
+		restart("network")
+		os.system("echo '\nMail Server:-' >> confiles/servers_status")
+		os.system("service postfix status >> confiles/servers_status")
+		os.system("chkconfig postfix on")
+		msgbox("Successfully Installed Mail server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nis_install():
+	try:
+		var=os.system("rpm -q ypserv &> /dev/null")
+		if var!=0:
+			install("ypserv")
+		restart("ypserv")
+		os.system("echo '\nNIS Server:-' >> confiles/servers_status")
+		os.system("service ypserv status  >> confiles/servers_status")
+		os.system("chkconfig ypserv on")
+		msgbox("Successfully Installed NIS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nfs_install():
+	try:
+		var=os.system("rpm -q nfs-utils &> /dev/null")
+		if var!=0:
+			install("nfs")
+		restart("nfs")
+		os.system("echo '\nNFS Server:-' >> confiles/servers_status")
+		os.system("service nfs status >> confiles/servers_status")
+		os.system("chkconfig nfs on")
+		msgbox("Successfully Installed NFS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+main_server_install()
+#!/usr/bin/python2
+import os
+import time
+import sys
+from dm import *
+
+def main_server_install():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --backtitle 'SERVER SIDE SOFTWARE INSTALLATION' --menu  'Install Server Side Requirements for :-' 25 60 10 1 'Telnet' 2 'FTP' 3 'SSH' 4 'Web Browser' 5 'Mail' 6 'NIS' 7 'NFS' 8 'Samba' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			telnet_install()
+		elif int(ch)==2:
+			ftp_install()
+		elif int(ch)==3:
+			ssh_install()
+		elif int(ch)==4:
+			web_install()
+		elif int(ch)==5:
+			mail_install()
+		elif int(ch)==6:
+			nis_install()
+		elif int(ch)==7:
+			nfs_install()
+		elif int(ch)==8:
+			samba_install()
+		else:
+			infobox("Some Unknown Error!! Program will terminate now. Please Contact Developer","20","30")
+			time.sleep(3)
+			sys.exit()
+
+def ftp_install():
+	try:
+		var=os.system("rpm -q vsftpd &> /dev/null")
+		if var!=0:
+			install("vsftpd")
+		restart("vsftpd")
+		os.system("echo '\nFTP Server:-' >> confiles/servers_status")
+		os.system("service vsftpd status >> confiles/servers_status")
+		os.system("chkconfig vsftpd on")
+		msgbox("Successfully Installed FTP server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def telnet_install():
+	try:
+		var=os.system("rpm -q telnet-server &> /dev/null")+os.system("rpm -q telnet &> /dev/null")
+		if var!=0:
+			install("telnet")
+			install("telnet-server")
+		restart("xinetd")
+		restart("telnet")
+		os.system("echo '\nTelnet Server:-' >> confiles/servers_status")
+		os.system("service xinetd status >> confiles/servers_status")
+		os.system("chkconfig telnet on")
+		os.system("chkconfig xinetd on")
+		msgbox("Successfully Installed Telnet server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def samba_install():
+	try:
+		var=os.system("rpm -q samba* &> /dev/null")
+		if var!=0:
+			install("samba")
+		restart("smb")
+		os.system("echo '\nSamba Server:-' >> confiles/servers_status")
+		os.system("service smb status >> confiles/servers_status")
+		os.system("chkconfig smb on")
+		msgbox("Successfully Installed Samba server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def ssh_install():
+	try:
+		var=os.system("rpm -q openssh-server &> /dev/null")
+		if var!=0:
+			install("openssh-server")
+		restart("sshd")
+		os.system("echo '\nSSH Server:-' >> confiles/servers_status")
+		os.system("service sshd status >> confiles/servers_status")
+		os.system("chkconfig sshd on")
+		msgbox("Successfully Installed SSH server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def web_install():
+	try:
+		var=os.system("rpm -q http* &> /dev/null")
+		if var!=0:
+			install("httpd")
+			install("httpd-devel")
+		restart("httpd")
+		os.system("echo '\nWEB Server:-' >> confiles/servers_status")
+		os.system("service httpd status >> confiles/servers_status")
+		os.system("chkconfig httpd on")
+		msgbox("Successfully Installed Web server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def mail_install():
+	try:
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		restart("postfix")
+		restart("network")
+		os.system("echo '\nMail Server:-' >> confiles/servers_status")
+		os.system("service postfix status >> confiles/servers_status")
+		os.system("chkconfig postfix on")
+		msgbox("Successfully Installed Mail server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nis_install():
+	try:
+		var=os.system("rpm -q ypserv &> /dev/null")
+		if var!=0:
+			install("ypserv")
+		restart("ypserv")
+		os.system("echo '\nNIS Server:-' >> confiles/servers_status")
+		os.system("service ypserv status  >> confiles/servers_status")
+		os.system("chkconfig ypserv on")
+		msgbox("Successfully Installed NIS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+def nfs_install():
+	try:
+		var=os.system("rpm -q nfs-utils &> /dev/null")
+		if var!=0:
+			install("nfs")
+		restart("nfs")
+		os.system("echo '\nNFS Server:-' >> confiles/servers_status")
+		os.system("service nfs status >> confiles/servers_status")
+		os.system("chkconfig nfs on")
+		msgbox("Successfully Installed NFS server on the Computer","10","40")
+	except:
+		msgbox("Error!! Please Contact the Developer","10","40")
+
+main_server_install()
+#!/usr/bin/python2
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def nisnfs_conf():
+	os.system("touch confiles/config")
+	inputbox("Enter name of Directory in which user data will be saved:- ","10","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read().strip()
+	fhdir.close()
+	os.system("mkdir /"+direc)
+	msgbox("Enter name of Users for which you want to setup NFS service","15","40")		
+	inputbox("Enter No. of users ","10","50","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.cl+ose()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"10","50","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("mkdir /"+direc+"/"+user)
+		os.system("cp -rf /etc/skel /"+direc+"/"+user) 
+	install("nfs-utils")
+	os.system("setenforce 0; iptables -F")
+	os.system("chmod o+w /"+direc+"/ -R")
+	os.system("echo  '/'"+direc+" '*(sync,rw)' >> /etc/exports")		
+	restart("nfs")		
+
+def samba_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Share your Directory to all ' 2 'Share directory with a user' 3 'Allow only certain No.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+			os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+			os.system("echo 'public = yes'  >> /etc/samba/smb.conf ")
+			os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc)
+			inputbox("Give a short Section Name to your Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			secname=fhdir.read().strip()
+			fhdir.close()
+			inputbox("Enter name of the User:- ","10","50","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("useradd "+user+" &>/dev/null")
+			yesnobox("Do you want a password based Security??","10","40","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+				os.system("smbpasswd -a "+user )
+			else: 
+				os.system("echo '['"+secname+"']' >> /etc/samba/smb.conf ")
+				os.system("echo 'path = '"+direc+" >> /etc/samba/smb.conf ")
+				os.system("echo 'public = no'  >> /etc/samba/smb.conf ")
+				os.system("echo 'writeable = yes'  >> /etc/samba/smb.conf ")
+				os.system("echo 'valid users = '"+user+"  >> /etc/samba/smb.conf ")
+			restart("smb")
+		elif int(ch)==3:
+			inputbox("Enter No. of IPs to only Allow them ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' > confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '80s/.*hosts allow.*/        hosts allow = "+ips+"/' /etc/samba/smb.conf`")
+			restart("smb")
+		else:
+			sys.exit()
+
+def nfs_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Share your Directory on many IPs' 2 'Give access to all IPs on the web ' 3 'Change Permission to (read & write) for a particular shared directory for a particular IP' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		os.system("setenforce 0")
+		os.system("iptables -F")
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Path of Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("With how many IPs do you want to share?? :- ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo  "+direc+" "+ip+"'(sync)' >> /etc/exports") 
+			restart("nfs")
+		elif int(ch)==2:
+			inputbox("Enter Path of Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			os.system("echo  "+direc+" *'(sync)' >> /etc/exports")
+			restart("nfs")
+		elif int(ch)==3:
+			inputbox("Enter Path of Directory:- ","10","50","confiles/config")
+			fhdir=open("confiles/config", "r")
+			direc=fhdir.read().strip()
+			fhdir.close()
+			os.system("chmod 777 "+direc) 
+			inputbox("For how many IPs do you want to change permission to read and write?? :- ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				str1=direc+" "+ip+"(sync)"
+				str2=direc+" "+ip+"(sync,rw)"
+				repl("/etc/exports",str1,str2)
+			restart("nfs")		
+		else:
+			sys.exit()
+
+def nis_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Set DomainName of NIS server ' 2 'Add User Accounts' 3 'Update NIS Database' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch)==1:
+			inputbox("Enter Domain Name ","10","50","confiles/config")
+			fhydn=open("confiles/config", "r")
+			ydn=fhydn.read().strip()
+			fhydn.close()
+			os.system("ypdomainname "+ydn)
+			restart("ypserv")	
+		elif int(ch)==2:
+			inputbox("Enter No. of users to Add them ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"10","50","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("useradd "+user) 
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")				
+		elif int(ch)==3:
+			os.system("cd /var/yp/ ; make ")
+			restart("ypserv")		
+		else:
+			sys.exit()
+
+
+def web_conf():
+	p=1 
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Enter your html code for testing' 2 'Name based Virtual Hosting' 3 'Serve Web pages to All' 4 'Serve Web Pages to certain no.of IPs' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter your HTML Code here","10","40","/var/www/html/index.html")
+			os.system("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' &> confiles/config ")#hostname -I
+			fhip=open("confiles/config","r")
+			ip1=fhip.read()
+			ip=ip1.strip()
+			fhip.close()
+			os.system("firefox "+`ip`+" & sleep 5; pkill firefox")
+			msgbox("Your website is now running at IP:- "+ip,"10","40")
+		elif int(ch)==2:
+			os.system("iptables -F; setenforce 0")
+			restart("httpd")
+			os.system("hostname -I &> confiles/config ")
+			fhip=open("confiles/config","r")
+			ip=fhip.read().strip()
+			fhip.close()
+			os.system(" `sed -i 's/NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			os.system(" `sed -i 's/#NameVirtualHost.*/NameVirtualHost "+ip+":80/g' /etc/httpd/conf/httpd.conf` ")
+			inputbox("How many websites do you want to host on IP "+ip+" virtually?","15","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter Website Name ","15","50","confiles/config")
+				fhweb=open("confiles/config", "r")
+				web=fhweb.read().strip()
+				fhweb.close()
+				#os.system("rm -rf /var/www/"+web+"/ &> /dev/null") 
+				#infobox("hi","","20","40")
+				os.system("mkdir /var/www/"+web+'/'" &> /dev/null")
+				os.system("`cp   /root/Desktop/Project/index.html /var/www/"+web+"/`")
+				#os.system("echo 'WELCOME TO MY ARENA' >> /var/www/"+web+"/index.html")
+				#os.system("sed -i 's/''/WELCOME TO '"+web+"'/g' /var/www/"+web+"/index.html") 
+				os.system("echo '<'VirtualHost "+web+"'>' >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '	DocumentRoot /var/www/'"+web+" >> /etc/httpd/conf/httpd.conf")
+				os.system("echo '	ServerName '"+ip+" >> /etc/httpd/conf/httpd.conf") 
+				os.system("echo '<'/VirtualHost'>' >> /etc/httpd/conf/httpd.conf")
+				os.system("echo  "+ip+" "+web+" >> /etc/hosts")
+				restart("httpd")
+				os.system("firefox "+`web`+" & sleep 5; pkill firefox")
+				msgbox("Your website "+web+" is now running at IP:- "+ip,"10","40")
+		elif int(ch)==3:
+			os.system("`sed -i '344s/Allow from.*/Allow from all/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of IPs to only Allow them ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("cat '' *> confiles/iplist")
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n ' '"+ip+"' ' >> confiles/iplist") 
+			fhip=open("confiles/iplist", "r")
+			ips=fhip.read().strip()
+			fhip.close()
+			os.system("`sed -i '344s/.*Allow from.*/    Allow from "+ips+"/' /etc/httpd/conf/httpd.conf`")
+			restart("httpd")	
+		else:
+			sys.exit()
+
+def telnet_conf():
+	p=1
+	progressbar("20","30")
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Allow Telnet only from certain no. of IPs' 2 'Restrict Some IPs' 3 'Allow Root Login from Telnet' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter No. of IPs","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'only_from = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==2:
+			inputbox("Enter No. of IPs","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n 'no_access = ' >> /etc/xinetd.conf") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter IP Address "+str(i),"10","50","confiles/config")
+				fhip=open("confiles/config", "r")
+				ip=fhip.read().strip()
+				fhip.close()
+				os.system("echo -n "+ip+"' ' >> /etc/xinetd.conf") 
+			restart("xinetd")
+		elif int(ch)==3:
+			inputbox("Enter No. of Telnet Sessions as root that you want:-","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			if cnt<=10:
+				for i in range(cnt):
+					os.system("echo pts/"+str(i)+" >> /etc/securetty") 
+				restart("xinetd")
+			else:
+				msgbox("Maximum Root Sessions Limit reached..Please enter a number less than or equal to 10","10","50")
+		else:
+			sys.exit()
+
+
+def ftp_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Allow Anonymous users to Login' 2 'Allow Local Users to Login' 3 'Allow Root Login' 4 'Deny some users' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/anonymous_enable=.*/anonymous_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			restart("vsftpd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/local_enable=.*/local_enable=YES/g' /etc/vsftpd/vsftpd.conf`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/ftpusers`")
+			os.system("`sed -i 's/root//g' /etc/vsftpd/user_list`")
+			restart("vsftpd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of users to deny them ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"10","50","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/ftpusers") 
+				os.system("echo  "+user+"' ' >> /etc/vsftpd/user_list")
+			restart("vsftpd")				
+		else:
+			sys.exit()
+
+
+def ssh_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Block Root Login through SSH' 2 'Permit Empty Passwords' 3 'Enable Password Authentification' 4 'Set Maximum Authentication Limit' 5 'Deny some users' 6 'Set Login Grace Time' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			os.system("`sed -i 's/#PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		elif int(ch)==4:
+			inputbox("Enter No. of Maximum Tries ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/MaxAuthTries.*/MaxAuthTries "+cnt+"/g' /etc/ssh/sshd_config`")
+			restart("sshd")
+		elif int(ch)==5:
+			inputbox("Enter No. of users to deny them ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=int(fhcnt.read())
+			fhcnt.close()
+			os.system("echo -n DenyUsers >> /etc/ssh/sshd_config") 
+			for i in range(cnt):
+				i=i+1
+				inputbox("Enter user "+str(i),"10","50","confiles/config")
+				fhusr=open("confiles/config", "r")
+				user=fhusr.read().strip()
+				fhusr.close()
+				os.system("echo -n ' '"+user+"' ' >> /etc/ssh/sshd_config") 
+			restart("sshd")	
+		elif int(ch)==6:
+			inputbox("Enter time in minutes ","10","50","confiles/config")
+			fhcnt=open("confiles/config", "r")
+			cnt=fhcnt.read().strip()
+			fhcnt.close()
+			os.system("`sed -i 's/#LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			os.system("`sed -i 's/LoginGraceTime.*/LoginGraceTime "+cnt+"m/g' /etc/ssh/sshd_config`")
+			restart("sshd")			
+		else:
+			sys.exit()
+
+def mail_conf():
+	p=1
+	os.system("touch confiles/config")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Change Hostname' 2 'Allow Mail incoming from All Interfaces' 3 'Allow mail from Local machine' 4 'Mail Forwarding from Root Account' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Hostname","10","50","confiles/config")
+			fhost=open("confiles/config", "r")
+			hostname=fhost.read().strip()
+			fhost.close()
+			os.system("hostname "+hostname)
+			restart("postfix")
+		elif int(ch)==2:
+			os.system("`sed -i 's/#inet_interfaces = all/inet_interfaces = all/g' /etc/postfix/main.cf`")
+			os.system("`sed -i 's/inet_interfaces = localhost/#inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")
+		elif int(ch)==3:
+			os.system("`sed -i 's/#inet_interfaces = localhost/inet_interfaces = localhost/g' /etc/postfix/main.cf`")
+			restart("postfix")			
+		elif int(ch)==4:
+			inputbox(" Enter the name of User ","10","50","confiles/config")
+			fhusr=open("confiles/config", "r")
+			user=fhusr.read().strip()
+			fhusr.close()
+			os.system("`sed -i 's/#root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("`sed -i 's/root:		.*/root:		"+user+"/g' /etc/aliases`")
+			os.system("newaliases")
+			restart("postfix")	
+		else:
+			sys.exit()
+

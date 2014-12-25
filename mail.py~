@@ -1,0 +1,37 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("MAIL SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/mailch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 5 1 'Install mail Server' 2 'Enable mail Server' 3 'Restart mail Service' 4 'Always start mail service at BOOT time' 2> files/mailch")
+		fhch=open("files/mailch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q postfix &> /dev/null")
+			if var!=0:
+				install("postfix")
+				msgbox("Successfully installed mail server on the Computer","10","40")
+			else:
+				msgbox("mail Server is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("service postfix start &> /dev/null")
+			msgbox("mail Server- Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("postfix")
+			msgbox("mail service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig postfix on")
+		else:
+			sys.exit()

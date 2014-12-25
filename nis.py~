@@ -1,0 +1,37 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("NIS SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/nisch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 5 1 'Install NIS Server' 2 'Enable NIS Server' 3 'Restart NIS Service' 4 'Always start NIS service at BOOT time' 2> files/nisch")
+		fhch=open("files/nisch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q ypserv &> /dev/null")
+			if var!=0:
+				install("ypserv")
+				msgbox("Successfully installed NIS server on the Computer","10","40")
+			else:
+				msgbox("NIS Server is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("service ypserv start &> /dev/null")
+			msgbox("NIS Server- Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("ypserv")
+			msgbox("NIS service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig ypserv on")
+		else:
+			sys.exit()

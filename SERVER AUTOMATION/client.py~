@@ -1,0 +1,175 @@
+#!/usr/bin/python2
+
+import os
+import time
+import sys
+import fileinput
+from dm import *
+
+def repl(file,searchExp,replaceExp):
+    for line in fileinput.input(file, inplace=1):
+        if searchExp in line:
+            line = line.replace(searchExp,replaceExp)
+        sys.stdout.write(line)
+
+def telnet_client():
+	var=os.system("rpm -q telnet &> /dev/null")
+	if var!=0:
+		install("telnet")
+	inputbox("Enter IP for Telnet connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("telnet "+ip)
+
+def ssh_client():
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ssh "+ip)
+
+def ftp_client():
+	var=os.system("rpm -q ftp &> /dev/null")
+	if var!=0:
+		install("ftp")
+	inputbox("Enter IP for SSH connection ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	msgbox("You Can Close Connection By Pressing Ctrl+D key","15","40")
+	os.system("ftp "+ip)
+	
+def web_py():
+	var=os.system("rpm -q firefox &> /dev/null")
+	if var!=0:
+		install("firefox")
+	inputbox("Enter IP/URL of Website ","15","40","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read().strip()
+	fhip.close()
+	os.system("firefox "+ip)
+
+def mail_client():
+	p=1
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Send Mail' 2 'Check All Received Mails' 3 'See Instructions/Commands' 2> confiles/config")
+		fhch=open("confiles/config", "r")
+		ch=fhch.read()
+		fhch.close()
+		var=os.system("rpm -q postfix &> /dev/null")
+		if var!=0:
+			install("postfix")
+		if ch=="":
+			break
+		elif int(ch) == 1:
+			inputbox("Enter Email Id/User to which you want to send mail ","15","40","confiles/config")
+			fhip=open("confiles/config", "r")
+			ip=fhip.read().strip()
+			fhip.close()
+			yesnobox("Do you want to attach a file??","10","40","confiles/config")
+			fhyes=open("confiles/config", "r")
+			status=fhyes.read().strip()
+			fhyes.close()
+			if status=="0":
+				os.system("dialog --fselect /root/Desktop/ 18 48 2> confiles/config")
+				fhfp=open("confiles/config", "r")
+				fp=fhfp.read().strip()
+				fhfp.close()
+				os.system("mail -a "+fp+" "+ip)
+			else:
+				os.system("mail "+ip)
+		else:
+			sys.exit()	
+def nis_client():
+	var=os.system("rpm -q ypbind &> /dev/null")
+	if var!=0:
+		install("ypbind")
+	inputbox("Enter No. of users to Make their separate Directory where they can work","15","50","confiles/config")
+	fhcnt=open("confiles/config", "r")
+	cnt=int(fhcnt.read())
+	fhcnt.close()
+	for i in range(cnt):
+		i=i+1
+		inputbox("Enter user "+str(i),"10","50","confiles/config")
+		fhusr=open("confiles/config", "r")
+		user=fhusr.read().strip()
+		fhusr.close()
+		os.system("cp -rf /etc/skel /home/"+user)
+	os.system("authconfig--tui")
+
+def samba_client():
+	var=os.system("rpm -q samba-client &> /dev/null")
+	if var!=0:
+		install("samba-client")
+	inputbox("Enter ip address of samba server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter Share Name ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("smbclient //"+ip+"/"+sh) 
+
+def nfs_client():
+	var=os.system("rpm -q nfs-utils &> /dev/null")
+	if var!=0:
+		install("nfs-utils")
+	inputbox("Enter Name of the directory for mounting NFS folder","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("mkdir /media/"+direc)
+	os.system("mount -t nfs "+ip+":"+sh+" /media/"+direc)
+	
+def autofs_client():
+	var=os.system("rpm -q autofs &> /dev/null")
+	if var!=0:
+		install("autofs")
+	inputbox("Enter Path of the directory for mounting user's workspace","15","50","confiles/config")
+	fhdir=open("confiles/config", "r")
+	direc=fhdir.read()
+	fhdir.close()
+	inputbox("Enter Name of the user for autofs","15","50","confiles/config")
+	fhusr=open("confiles/config", "r")
+	user=fhusr.read()
+	fhusr.close()
+	os.system("setenforce 0; iptables -F")
+	inputbox("Enter ip address of nfs server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	inputbox("Enter Share Path ","15","50","confiles/config")
+	fhsh=open("confiles/config", "r")
+	sh=fhsh.read()
+	fhsh.close()
+	os.system("echo "+user+"	"+ip+":"+sh+"/"+user+" >> /etc/auto.misc")
+	repl("/etc/auto.master",".*/etc/auto.misc",direc+"	/etc/auto.misc")	
+	restart("autofs")
+	
+def ntp_client():
+	var=os.system("rpm -q ntp &> /dev/null")
+	if var!=0:
+		install("ntp")
+	inputbox("Enter ip address of ntp server","15","50","confiles/config")
+	fhip=open("confiles/config", "r")
+	ip=fhip.read()
+	fhip.close()
+	os.system("echo 'server '"+ip+" >> /etc/ntp.conf")
+	restart("ntpd")
+	os.system("ntpdate -b "+ip)
+	msgbox("Time synchronised with the NTP Server","15","40") 
+ntp_client()

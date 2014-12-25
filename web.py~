@@ -1,0 +1,47 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("WEB SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/webch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 5 1 'Install web Server' 2 'Enable web Server' 3 'Restart web Service' 4 'Always start web service at BOOT time' 5 'Enter your html code for testing' 2> files/webch")
+		fhch=open("files/webch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q http* &> /dev/null")
+			if var!=0:
+				install("httpd")
+				install("httpd-devel")
+				msgbox("Successfully installed web server on the Computer","10","40")
+			else:
+				msgbox("web Server is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("service httpd start &> /dev/null")
+			msgbox("Web Server- Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("httpd")
+			msgbox("web service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig httpd on")
+		elif int(ch)==5:
+			inputbox("hi","10","40","/var/www/html/index.html")
+			os.system("ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' &> files/ipaddr ")#hostname -I
+			fhip=open("files/ipaddr","r")
+			ip1=fhip.read()
+			ip=ip1.strip()
+			fhip.close()
+			os.system("firefox "+`ip`+" & sleep 5; pkill firefox")
+			msgbox("Your website is now running at IP:- "+ip,"10","40") 
+		else:
+			sys.exit()

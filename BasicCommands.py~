@@ -1,0 +1,56 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+# archive manager #File operations #File Permissions # Netstat # IP changer # MAC Changer 
+infobox("Basic Commands \n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/basicch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 15 1 'Show list of All TCP and UDP Ports' 2 'Calender' 3 'Linux Train' 4 'Browse Web using Mozilla Firefox' 5 'Hard Disk Status' 6 'Check CPU Load Status' 7 'List of All Users' 8 'Show all Mounted Devices' 9 'CPU Information' 10 'To see list of allowed ports for services' 2> files/basicch")
+		fhch=open("files/basicch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			os.system("netstat -ntulp &> files/temp")
+			textbox("files/temp","50","60")		
+		elif int(ch) == 2:
+			os.system("cal &> files/temp")
+			textbox("files/temp","15","30")
+		elif int(ch)==3:
+			install("sl")
+			os.system("sl")
+		elif int(ch)==4:
+			inputbox("Enter Website URL/IP Address here","10","40","files/temp")
+			fhbasic=open("files/temp", "r")
+			ip=fhbasic.read().strip()
+			fhbasic.close()
+			os.system("firefox "+ip)
+		elif int(ch)==5:
+			os.system("fdisk -cul &> files/temp")
+			textbox("files/temp","25","100")
+		elif int(ch)==6:
+			os.system("uptime &> files/temp")
+			textbox("files/temp","25","70")
+		elif int(ch)==7:
+			os.system("w &> files/temp")
+			textbox("files/temp","30","60")
+		elif int(ch)==8:
+			os.system("df -h &> files/temp")
+			textbox("files/temp","30","60")
+		elif int(ch)==9:
+			os.system("lscpu &> files/temp")
+			textbox("files/temp","20","50")
+		elif int(ch)==10:
+			os.system("yum install -y policycoreutils-python &> /dev/null")
+			os.system("semanage port -l &> files/temp")
+			textbox("files/temp","50","40")		
+		else:
+			sys.exit()

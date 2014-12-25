@@ -1,0 +1,54 @@
+##dialog --begin 10 30 --backtitle "System Information" \
+--title "About" \
+--msgbox 'This is an entirely open source software.' 10 30
+
+
+##
+  --calendar     <text> <height> <width> <day> <month> <year>
+  --checklist    <text> <height> <width> <list height> <tag1> <item1> <status1>...
+  --dselect      <directory> <height> <width>
+  --editbox      <file> <height> <width>
+  --fselect      <filepath> <height> <width>
+  --gauge        <text> <height> <width> [<percent>]
+  --infobox      <text> <height> <width>
+  --inputbox     <text> <height> <width> [<init>]
+  --inputmenu    <text> <height> <width> <menu height> <tag1> <item1>...
+  --menu         <text> <height> <width> <menu height> <tag1> <item1>...
+  --msgbox       <text> <height> <width>
+  --passwordbox  <text> <height> <width> [<init>]
+  --pause        <text> <height> <width> <seconds>
+  --progressbox  <height> <width>
+  --radiolist    <text> <height> <width> <list height> <tag1> <item1> <status1>...
+  --tailbox      <file> <height> <width>
+  --tailboxbg    <file> <height> <width>
+  --textbox      <file> <height> <width>
+  --timebox      <text> <height> <width> <hour> <minute> <second>
+  --yesno        <text> <height> <width>
+
+
+##dialog --title "Hello" --msgbox 'Hello world!' 6 20
+
+## dialog --title "Password" \
+--clear \
+--insecure \
+--passwordbox "Enter your password" 10 30 2> $data
+
+PROGRESS BOX:-
+echo "100" | dialog --gauge "Please wait" 10 70 0
+
+for i in $(seq 0 8 100) ; do sleep 0.8; echo $i | dialog --gauge "Please wait" 10 70 0; done
+
+dialog --title "Delete file" \
+--backtitle "Linux Shell Script Tutorial Example" \
+--yesno "Are you sure you want to permanently delete \"/tmp/foo.txt\"?" 7 60
+ 
+
+dialog --ok-label "Submit" \
+	  --backtitle "Linux User Managment" \
+	  --title "Useradd" \
+	  --form "Create a new user" \
+15 50 0 \
+	"Username:" 1 1	"$user" 	1 10 10 0 \
+	"Shell:"    2 1	"$shell"  	2 10 15 0 \
+	"Group:"    3 1	"$groups"  	3 10 8 0 \
+	"HOME:"     4 1	"$home" 	4 10 40 0 \

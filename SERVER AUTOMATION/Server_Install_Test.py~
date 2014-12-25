@@ -1,0 +1,14 @@
+#!/usr/bin/python2
+from Server_Install import *
+os.system("cat clear > confiles/servers_status &> /dev/null")
+def AllAtOneGo():	
+	telnet_install()
+	ftp_install()
+	web_install()
+	mail_install()
+	ssh_install()
+	nis_install()
+	nfs_install()
+	samba_install()
+	
+	

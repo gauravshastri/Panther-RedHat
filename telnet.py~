@@ -1,0 +1,40 @@
+#!/usr/bin/python2
+import os
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("TELNET SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/telnetch")
+	while p!=0:
+		os.system("dialog --menu 'Select your Choice' 20 50 5 1 'Install Telnet' 2 'Enable Telnet Service' 3 'Restart Service' 4 'Always start FTP service at BOOT time' 2> files/telnetch")
+		fhch=open("files/telnetch", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q telnet &> /dev/null")
+			if var!=0:
+				install("telnet")
+				install("telnet-server")
+				msgbox("Successfully installed Telnet on the Computer","10","40")
+			else:
+				msgbox("Telnet is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("`sed -i 's/yes/no/' /etc/xinetd.d/telnet`")
+			msgbox("Telnet Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("xinetd")
+			msgbox("service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig telnet on")
+		else:
+			sys.exit()

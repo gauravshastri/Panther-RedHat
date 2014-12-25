@@ -1,0 +1,37 @@
+import time
+import sys
+from dm import *
+os.system("whoami > files/user")
+fhuser=open("files/user", "r")
+user=fhuser.read()
+fhuser.close()
+#_______________________________________________________
+
+infobox("NFS SERVER\n","WELCOME "+ user,"10","30")
+if user.strip()=="root": 
+	p=1
+	os.system("touch files/nfsch")
+	while p!=0:
+		os.system("dialog --menu '\t\t\tSelect your Choice' 20 50 5 1 'Install NFS Server' 2 'Enable NFS Server' 3 'Restart NFS Service' 4 'Always start NFS service at BOOT time' 2> files/nfsch")
+		fhch=open("files/nfs", "r")
+		ch=fhch.read()
+		fhch.close()
+		if ch=="":
+			break
+		if int(ch) == 1:
+			var=os.system("rpm -q nfs-utils &> /dev/null")
+			if var!=0:
+				install("nfs-utils")
+				msgbox("Successfully installed NFS server on the Computer","10","40")
+			else:
+				msgbox("NFS Server is already installed","10","40")
+		elif int(ch) == 2:
+			os.system("service nfs start &> /dev/null")
+			msgbox("NFS Server- Service Enabled","10","40")
+		elif int(ch)==3:
+			restart("nfs")
+			msgbox("NFS service restarted","10","40")
+		elif int(ch)==4:
+			os.system("chkconfig nfs on")
+		else:
+			sys.exit()
